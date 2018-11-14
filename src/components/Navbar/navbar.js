@@ -1,5 +1,21 @@
 import $ from 'jquery';
 import './navbar.scss';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+
+const navbarEvents = () => {
+  $('.nav-link').on('click', (e) => {
+    if (e.target.id === 'navbar-button-logout') {
+      firebase.auth().signOut().then(() => {
+        console.log('you logged out');
+      }).catch((err) => {
+        console.error('you still logged in', err);
+      });
+    } else {
+      console.log(e.target.id);
+    }
+  });
+};
 
 const createNavbar = () => {
   const domString = `
@@ -12,7 +28,7 @@ const createNavbar = () => {
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a id="navbar-button-auth" class="nav-link">Authenitication</a>
+        <a id="navbar-button-auth" class="nav-link">Authentication</a>
       </li>
       <li class="nav-item">
         <a id="navbar-button-holidays" class="nav-link">Holidays</a>
@@ -29,6 +45,7 @@ const createNavbar = () => {
   `;
 
   $('#navbar').html(domString);
+  navbarEvents();
 };
 
 export default createNavbar;
