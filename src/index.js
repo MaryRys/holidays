@@ -1,3 +1,10 @@
-import './index.scss';
 
-console.log('test');
+
+import './index.scss';
+import createNavbar from './components/Navbar/navbar';
+
+const initializeApp = () => {
+  createNavbar();
+};
+
+initializeApp();
