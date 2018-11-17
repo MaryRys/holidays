@@ -1,5 +1,4 @@
 {
-"friends": {
   "friend1": {
       "name": "Callan M.",
       "address": "1 Main Street, Nashville, TN 37209",
@@ -45,5 +44,4 @@
         "isAvoiding": true,
         "uid": "1234"
       }
-  }
 }
