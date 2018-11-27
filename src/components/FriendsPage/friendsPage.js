@@ -1,8 +1,18 @@
 import $ from 'jquery';
 import authHelpers from '../../helpers/authHelpers';
 import friendsData from '../../helpers/data/friendsData';
+import holidayFriendsData from '../../helpers/data/holidayFriendsData';
+import holidaysData from '../../helpers/data/holidaysData';
 
-const printSingleFriend = (friend) => {
+const holidayStringBuilder = (holidays) => {
+  let holidayString = '<h3>Holidays:</h3>';
+  holidays.forEach((holiday) => {
+    holidayString += `<h5>${holiday.name} ${holiday.Date}</h5>`;
+  });
+  return holidayString;
+};
+
+const printSingleFriend = (friend, holidays) => {
   const friendString = `
   <div>
     <h1>${friend.name}</h1>
@@ -10,20 +20,36 @@ const printSingleFriend = (friend) => {
     <p>${friend.address}</p>
     <p>${friend.email}</p>
     <p>${friend.phoneNumber}</p>
+    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="inlineCheckbox1">Am I avoiding them?</label>
+    <input class="form-check-input is-avoiding-checkbox" type="checkbox" id="${friend.id}">
+   </div>
     <button class="bt btn-danger delete-btn" data-delete-id=${friend.id}>X</button> 
     <button class="bt btn-info edit-btn" data-edit-id=${friend.id}>Edit</button>
+    <div class="holiday-container">${holidayStringBuilder(holidays)}</div>
   </div>
   `;
   $('#single-container').html(friendString);
+  if (friend.isAvoiding) {
+    $('.is-avoiding-checkbox').attr('checked', true);
+  }
 };
 
 const getSingleFriend = (e) => {
   // need firebase id
+  console.log('in getSingleFriend');
   const friendId = e.target.dataset.dropdownId;
-  friendsData.getSingleFriend(friendId)
-    .then((singleFriend) => {
-      printSingleFriend(singleFriend);
-    })
+  const uid = authHelpers.getCurrentUid();
+  friendsData.getSingleFriend(friendId).then((singleFriend) => {
+    holidayFriendsData.getHolidayIdsForFriend(friendId).then((holidayIds) => {
+      holidaysData.getHolidaysByArrayOfIds(uid, holidayIds).then((holidays) => {
+        printSingleFriend(singleFriend, holidays);
+      });
+    });
+    // const holidayIds = ['holiday1', 'holiday2'];
+    // const holidays = ['a', 'b', 'c'];
+    // printSingleFriend(singleFriend, holidays);
+  })
     .catch((error) => {
       console.error('error getting one friend', error);
     });
@@ -69,9 +95,21 @@ const deleteFriend = (e) => {
     });
 };
 
+const updateIsAvoiding = (e) => {
+  const friendId = e.target.id;
+  const isAvoiding = e.target.checked;
+  friendsData.updatedIsAvoiding(friendId, isAvoiding)
+    .then(() => {
+    })
+    .catch((err) => {
+      console.error('error in updating flag', err);
+    });
+};
+
 const bindEvents = () => {
   $('body').on('click', '.get-single', getSingleFriend);
   $('body').on('click', '.delete-btn', deleteFriend);
+  $('body').on('change', '.is-avoiding-checkbox', updateIsAvoiding);
 };
 
 const initializeFriendsPage = () => {
